@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capy's Happy List 🌿</title>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --butter: #F5E6A3;
+    --butter-light: #FBF3CC;
+    --butter-dark: #E8D06A;
+    --matcha: #7A9E5F;
+    --matcha-light: #A8C68A;
+    --matcha-dark: #4F7038;
+    --matcha-pale: #D4E8C2;
+    --cream: #FEFAF0;
+    --brown: #8B5E3C;
+    --brown-light: #C4956A;
+    --text: #3D2C1E;
+    --shadow: rgba(122, 158, 95, 0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    background-color: var(--butter-light);
+    background-image:
+      linear-gradient(var(--butter-dark) 1px, transparent 1px),
+      linear-gradient(90deg, var(--butter-dark) 1px, transparent 1px);
+    background-size: 40px 40px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+    overflow-x: hidden;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+  }
+
+  .title {
+    font-family: 'Gaegu', cursive;
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--matcha-dark);
+    text-shadow: 3px 3px 0 var(--butter-dark);
+    letter-spacing: 1px;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    color: var(--brown-light);
+    margin-top: 2px;
+    font-weight: 600;
+  }
+
+  /* Capybara Card */
+  .capy-card {
+    background: var(--cream);
+    border: 3px solid var(--matcha);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 6px 6px 0 var(--matcha-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .capy-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 8px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--matcha) 0px, var(--matcha) 20px,
+      var(--butter-dark) 20px, var(--butter-dark) 40px
+    );
+  }
+
+  .capy-display {
+    position: relative;
+    width: 140px;
+    height: 140px;
+  }
+
+  .capy-face {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 3px solid var(--brown);
+    overflow: hidden;
+    background: var(--butter);
+    position: relative;
+    transition: transform 0.3s ease;
+  }
+
+  /* SVG Capybara faces */
+  .capy-svg {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0; left: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .capy-svg.hidden { opacity: 0; }
+  .capy-svg.visible { opacity: 1; }
+
+  .happiness-label {
+    font-family: 'Gaegu', cursive;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--matcha-dark);
+    text-align: center;
+  }
+
+  /* Happiness Bar */
+  .happiness-bar-wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .bar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .bar-label {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--matcha-dark);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .bar-pct {
+    font-family: 'Gaegu', cursive;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--brown);
+  }
+
+  .bar-track {
+    width: 100%;
+    height: 22px;
+    background: var(--matcha-pale);
+    border-radius: 99px;
+    border: 2px solid var(--matcha);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--matcha-light), var(--matcha));
+    transition: width 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 22px;
+  }
+
+  .bar-fill::after {
+    content: '🌿';
+    font-size: 14px;
+    margin-right: 4px;
+    animation: spin 2s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Stars / sparkles on complete */
+  .sparkle-wrap {
+    position: absolute;
+    pointer-events: none;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .sparkle {
+    position: absolute;
+    font-size: 1.4rem;
+    animation: sparkleAnim 0.8s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes sparkleAnim {
+    0%   { opacity: 1; transform: translate(0, 0) scale(0.5); }
+    60%  { opacity: 1; transform: translate(var(--tx), var(--ty)) scale(1.2); }
+    100% { opacity: 0; transform: translate(calc(var(--tx) * 1.5), calc(var(--ty) * 1.5)) scale(0); }
+  }
+
+  /* Capy bounce animation on task complete */
+  @keyframes capyBounce {
+    0%   { transform: scale(1) rotate(0deg); }
+    25%  { transform: scale(1.15) rotate(-5deg); }
+    50%  { transform: scale(1.2) rotate(5deg); }
+    75%  { transform: scale(1.1) rotate(-3deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+
+  .capy-face.bounce {
+    animation: capyBounce 0.5s ease;
+  }
+
+  /* Todo Card */
+  .todo-card {
+    background: var(--cream);
+    border: 3px solid var(--matcha);
+    border-radius: 24px;
+    padding: 20px;
+    box-shadow: 6px 6px 0 var(--matcha-dark);
+  }
+
+  /* Input Row */
+  .input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .task-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2.5px solid var(--matcha);
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--butter-light);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .task-input:focus {
+    border-color: var(--matcha-dark);
+    box-shadow: 0 0 0 3px rgba(122,158,95,0.2);
+  }
+
+  .task-input::placeholder {
+    color: var(--brown-light);
+    font-style: italic;
+  }
+
+  .add-btn {
+    padding: 12px 20px;
+    background: var(--matcha);
+    color: white;
+    border: 2.5px solid var(--matcha-dark);
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s;
+    box-shadow: 3px 3px 0 var(--matcha-dark);
+  }
+
+  .add-btn:hover {
+    background: var(--matcha-dark);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--matcha-dark);
+  }
+
+  .add-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--matcha-dark);
+  }
+
+  /* Task List */
+  .task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 240px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 6px;
+  }
+
+  .task-list::-webkit-scrollbar {
+    width: 7px;
+  }
+  .task-list::-webkit-scrollbar-track {
+    background: var(--butter-light);
+    border-radius: 99px;
+  }
+  .task-list::-webkit-scrollbar-thumb {
+    background: var(--matcha-light);
+    border-radius: 99px;
+  }
+
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--butter-light);
+    border: 2.5px solid var(--butter-dark);
+    border-radius: 14px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .task-item:hover {
+    border-color: var(--matcha);
+    background: var(--matcha-pale);
+    transform: translateX(3px);
+  }
+
+  .task-item.completed {
+    background: var(--matcha-pale);
+    border-color: var(--matcha);
+    opacity: 0.75;
+  }
+
+  .task-item.completing {
+    animation: taskComplete 0.5s ease;
+  }
+
+  @keyframes taskComplete {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.04) translateX(4px); }
+    60%  { transform: scale(0.98); }
+    100% { transform: scale(1); }
+  }
+
+  .check-btn {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 8px;
+    border: 2.5px solid var(--matcha);
+    background: white;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 900;
+    color: white;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .task-item.completed .check-btn {
+    background: var(--matcha);
+    border-color: var(--matcha-dark);
+    color: white;
+  }
+
+  .task-text {
+    flex: 1;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+    transition: all 0.3s;
+  }
+
+  .task-item.completed .task-text {
+    text-decoration: line-through;
+    text-decoration-thickness: 2.5px;
+    text-decoration-color: var(--matcha-dark);
+    color: #a0937d;
+    font-style: italic;
+  }
+
+  .delete-btn {
+    opacity: 0;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 8px;
+    transition: opacity 0.2s, background 0.2s;
+    color: #e57373;
+  }
+
+  .task-item:hover .delete-btn {
+    opacity: 1;
+  }
+
+  .delete-btn:hover {
+    background: #fde8e8;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 24px 0;
+    font-family: 'Gaegu', cursive;
+    font-size: 1.1rem;
+    color: var(--brown-light);
+  }
+
+  /* Mood message */
+  .mood-msg {
+    font-family: 'Gaegu', cursive;
+    font-size: 1.05rem;
+    color: var(--matcha-dark);
+    text-align: center;
+    font-weight: 700;
+    transition: opacity 0.3s;
+  }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    pointer-events: none;
+    animation: confettiFall linear forwards;
+    border-radius: 2px;
+    z-index: 999;
+  }
+
+  @keyframes confettiFall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="title">🌿 Capy's Happy List</div>
+    <div class="subtitle">Complete tasks to make Capy smile!</div>
+  </div>
+
+  <!-- Capybara Mood Display -->
+  <div class="capy-card">
+    <div class="capy-display">
+      <div class="capy-face" id="capyFace">
+        <!-- Bored (0-20%) -->
+        <svg class="capy-svg visible" id="face0" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+          <rect width="140" height="140" fill="#5B93D3"/>
+          <!-- Body -->
+          <ellipse cx="70" cy="85" rx="50" ry="55" fill="#C8924F" stroke="#3D2C1E" stroke-width="3"/>
+          <!-- Ears -->
+          <ellipse cx="35" cy="42" rx="13" ry="11" fill="#C8924F" stroke="#3D2C1E" stroke-width="2.5"/>
+          <ellipse cx="35" cy="42" rx="8" ry="7" fill="#9B6B38"/>
+          <ellipse cx="105" cy="42" rx="13" ry="11" fill="#C8924F" stroke="#3D2C1E" stroke-width="2.5"/>
+          <ellipse cx="105" cy="42" rx="8" ry="7" fill="#9B6B38"/>
+          <!-- Head -->
+          <ellipse cx="70" cy="65" rx="45" ry="42" fill="#D4A06A" stroke="#3D2C1E" stroke-width="3"/>
+          <!-- Snout -->
+          <ellipse cx="70" cy="78" rx="22" ry="16" fill="#C48B50"/>
+          <!-- Sleepy eyes -->
+          <ellipse cx="52" cy="60" rx="14" ry="10" fill="white" stroke="#3D2C1E" stroke-width="2.5"/>
+          <ellipse cx="88" cy="60" rx="14" ry="10" fill="white" stroke="#3D2C1E" stroke-width="2.5"/>
+          <path d="M42 60 Q52 55 62 60" fill="none" stroke="#3D2C1E" stroke-width="3" stroke-linecap="round"/>
+          <path d="M78 60 Q88 55 98 60" fill="none" stroke="#3D2C1E" stroke-width="3" stroke-linecap="round"/>
+          <!-- Nostrils -->
+          <ellipse cx="64" cy="76" rx="3" ry="2.5" fill="#3D2C1E"/>
+          <ellipse cx="76" cy="76" rx="3" ry="2.5" fill="#3D2C1E"/>
+          <!-- Mouth line -->
+          <line x1="70" y1="79" x2="70" y2="87" stroke="#3D2C1E" stroke-width="2"/>
+          <!-- Flat mouth -->
+          <path d="M60 90 Q70 88 80 90" fill="none" stroke="#3D2C1E" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Fist at chin -->
+          <ellipse cx="45" cy="100" rx="12" ry="10" fill="#C8924F" stroke="#3D2C1E" stroke-width="2"/>
+        </svg>
+
+        <!-- Worried (20-40%) -->
+        <svg class="capy-svg hidden" id="face1" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+          <rect width="140" height="140" fill="#5B93D3"/>
+          <ellipse cx="70" cy="90" rx="50" ry="55" fill="#C8924F" stroke="#3D2C1E" stroke-width="3"/>
+          <ellipse cx="38" cy="38" rx="12" ry="11" fill="#C8924F" stroke="#3D2C1E" stroke-width="2.5"/>
+          <ellipse cx="38" cy="38" rx="7" ry="6.5" fill="#9B6B38"/>
+          <ellipse cx="102" cy="45" rx="12" ry="11" fill="#C8924F" stroke="#3D2C1E" stroke-width="2.5"/>
+          <ellipse cx="102" cy="45" rx="7" ry="6.5" fill="#9B6B38"/>
+          <ellipse cx="68" cy="68" rx="48" ry="44" fill="#D4A06A" stroke="#3D2C1E" stroke-width="3"/>
+          <ellipse cx="68" cy="80" rx="22" ry="16" fill="#C48B50"/>
+          <!-- Big worried eyes -->
+          <circle cx="53" cy="55" r="14" fill="white" stroke="#3D2C1E" stroke-width="2.5"/>
+          <circle cx="53" cy="57" r="5" fill="#3D2C1E"/>
+          <circle cx="90" cy="62" r="14" fill="white" stroke="#3D2C1E" stroke-width="2.5"/>
+          <circle cx="90" cy="64" r="5" fill="#3D2C1E"/>
+          <ellipse cx="63" cy="78" rx="3" ry="2.5" fill="#3D2C1E"/>
+          <ellipse cx="75" cy="78" rx="3" ry="2.5" fill="#3D2C1E"/>
+          <line x1="69" y1="81" x2="69" y2="89" stroke="#3D2C1E" stroke-width="2"/>
+          <!-- Worried mouth -->
+          <path d="M58 95 Q69 92 78 95" fill="none" stroke="#3D2C1E" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Little arms down -->
+          <path d="M30 110 Q35 105 42 112" fill="none" stroke="#3D2C1E" stroke-width="3" stroke-linecap="round"/>
+          <path d="M100 115 Q107 108 112 113" fill="none" stroke="#3D2C1E" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+
+        <!-- Shocked (40-60%) -->
+        <svg class="capy-svg hidden" id="face2" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+          <rect width="140" height="140" fill="#5B93D3"/>
+          <ellipse cx="70" cy="95" rx="52" ry="52" fill="#C8924F" stroke="#3D2C1E" stroke-width="3"/>
+          <ellipse cx="35" cy="45" rx="13" ry="11" fill="#C8924F" stroke="#3D2C1E" stroke-width="2.5"/>
+          <ellipse cx="35" cy="45" rx="8" ry="7" fill="#9B6B38"/>
+          <ellipse cx="105" cy="45" rx="13" ry="11" fill="#C8924F" stroke="#3D2C1E" stroke-width="2.5"/>
+          <ellipse cx="105" cy="45" rx="8" ry="7" fill="#9B6B38"/>
+          <ellipse cx="70" cy="70" rx="48" ry="45" fill="#D4A06A" stroke="#3D2C1E" stroke-width="3"/>
+          <ellipse cx="70" cy="82" rx="22" ry="16" fill="#C48B50"/>
+          <!-- Wide open eyes -->
+          <circle cx="50" cy="58" r="16" fill="white" stroke="#3D2C1E" stroke-width="2.5"/>
+          <circle cx="50" cy="60" r="5" fill="#3D2C1E"/>
+          <circle cx="90" cy="58" r="16" fill="white" stroke="#3D2C1E" stroke-width="2.5"/>
+          <circle cx="90" cy="60" r="5" fill="#3D2C1E"/>
+          <ellipse cx="63" cy="80" rx="3" ry="2.5" fill="#3D2C1E"/>
+          <ellipse cx="77" cy="80" rx="3" ry="2.5" fill="#3D2C1E"/>
+          <line x1="70" y1="83" x2="70" y2="90" stroke="#3D2C1E" stroke-width="2"/>
+          <!-- Shocked - hands over mouth -->
+          <path d="M42 100 Q50 88 62 95" fill="none" stroke="#3D2C1E" stroke-width="3" stroke-linecap="round"/>
+          <ellipse cx="55" cy="100" rx="14" ry="10" fill="#C8924F" stroke="#3D2C1E" stroke-width="2.5"/>
+          <path d="M78 100 Q90 88 98 95" fill="none" stroke="#3D2C1E" stroke-width="3" stroke-linecap="round"/>
+          <ellipse cx="85" cy="100" rx="14" ry="10" fill="#C8924F" stroke="#3D2C1E" stroke-width="2.5"/>
+        </svg>
+
+        <!-- Happy (60-80%) -->
+        <svg class="capy-svg hidden" id="face3" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+          <rect width="140" height="140" fill="#5B93D3"/>
+          <ellipse cx="70" cy="90" rx="52" ry="55" fill="#C8924F" stroke="#3D2C1E" stroke-width="3"/>
+          <ellipse cx="35" cy="42" rx="13" ry="11" fill="#C8924F" stroke="#3D2C1E" stroke-width="2.5"/>
+          <ellipse cx="35" cy="42" rx="8" ry="7" fill="#9B6B38"/>
+          <ellipse cx="105" cy="42" rx="13" ry="11" fill="#C8924F" stroke="#3D2C1E" stroke-width="2.5"/>
+          <ellipse cx="105" cy="42" rx="8" ry="7" fill="#9B6B38"/>
+          <ellipse cx="70" cy="66" rx="48" ry="44" fill="#D4A06A" stroke="#3D2C1E" stroke-width="3"/>
+          <ellipse cx="70" cy="78" rx="22" ry="16" fill="#C48B50"/>
+          <!-- Happy wide eyes -->
+          <circle cx="51" cy="56" r="14" fill="white" stroke="#3D2C1E" stroke-width="2.5"/>
+          <circle cx="51" cy="58" r="5" fill="#3D2C1E"/>
+          <circle cx="89" cy="56" r="14" fill="white" stroke="#3D2C1E" stroke-width="2.5"/>
+          <circle cx="89" cy="58" r="5" fill="#3D2C1E"/>
+          <!-- Gleam -->
+          <circle cx="55" cy="54" r="3" fill="white"/>
+          <circle cx="93" cy="54" r="3" fill="white"/>
+          <ellipse cx="63" cy="76" rx="3" ry="2.5" fill="#3D2C1E"/>
+          <ellipse cx="77" cy="76" rx="3" ry="2.5" fill="#3D2C1E"/>
+          <line x1="70" y1="79" x2="70" y2="86" stroke="#3D2C1E" stroke-width="2"/>
+          <!-- Big smile with teeth -->
+          <path d="M56 91 Q70 102 84 91" fill="none" stroke="#3D2C1E" stroke-width="2.5" stroke-linecap="round"/>
+          <rect x="62" y="91" width="16" height="8" rx="2" fill="white" stroke="#3D2C1E" stroke-width="1.5"/>
+        </svg>
+
+        <!-- Ecstatic (80-100%) -->
+        <svg class="capy-svg hidden" id="face4" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+          <rect width="140" height="140" fill="#5B93D3"/>
+          <ellipse cx="70" cy="95" rx="55" ry="55" fill="#C8924F" stroke="#3D2C1E" stroke-width="3"/>
+          <ellipse cx="33" cy="46" rx="13" ry="11" fill="#C8924F" stroke="#3D2C1E" stroke-width="2.5"/>
+          <ellipse cx="33" cy="46" rx="8" ry="7" fill="#9B6B38"/>
+          <ellipse cx="107" cy="46" rx="13" ry="11" fill="#C8924F" stroke="#3D2C1E" stroke-width="2.5"/>
+          <ellipse cx="107" cy="46" rx="8" ry="7" fill="#9B6B38"/>
+          <ellipse cx="70" cy="68" rx="50" ry="46" fill="#D4A06A" stroke="#3D2C1E" stroke-width="3"/>
+          <ellipse cx="70" cy="82" rx="24" ry="18" fill="#C48B50"/>
+          <!-- Squinty happy eyes -->
+          <path d="M37 60 Q51 50 65 60" fill="none" stroke="#3D2C1E" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M75 60 Q89 50 103 60" fill="none" stroke="#3D2C1E" stroke-width="3.5" stroke-linecap="round"/>
+          <ellipse cx="64" cy="80" rx="3.5" ry="3" fill="#3D2C1E"/>
+          <ellipse cx="78" cy="80" rx="3.5" ry="3" fill="#3D2C1E"/>
+          <line x1="71" y1="83" x2="71" y2="91" stroke="#3D2C1E" stroke-width="2"/>
+          <!-- Big open smile + tongue -->
+          <path d="M50 96 Q70 112 90 96" fill="none" stroke="#3D2C1E" stroke-width="3" stroke-linecap="round"/>
+          <ellipse cx="70" cy="100" rx="14" ry="8" fill="#F9A8A8"/>
+          <!-- Peace sign arm -->
+          <path d="M100 100 Q108 88 115 92" stroke="#3D2C1E" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <ellipse cx="115" cy="96" rx="12" ry="11" fill="#C8924F" stroke="#3D2C1E" stroke-width="2"/>
+          <!-- Two fingers up -->
+          <path d="M110 92 L108 80" stroke="#3D2C1E" stroke-width="3" stroke-linecap="round"/>
+          <path d="M116 93 L116 80" stroke="#3D2C1E" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="happiness-bar-wrap">
+      <div class="bar-header">
+        <span class="bar-label">Happiness</span>
+        <span class="bar-pct" id="pctLabel">0%</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" id="barFill" style="width: 5%"></div>
+      </div>
+    </div>
+
+    <div class="mood-msg" id="moodMsg">Capy is waiting for you to start... 😑</div>
+  </div>
+
+  <!-- Todo List -->
+  <div class="todo-card">
+    <div class="input-row">
+      <input class="task-input" id="taskInput" type="text" placeholder="Add a task for Capy..." maxlength="60"/>
+      <button class="add-btn" id="addBtn">＋</button>
+    </div>
+    <div class="task-list" id="taskList">
+      <div class="empty-state" id="emptyState">No tasks yet! Add one above 🌿</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const tasks = [];
+  let nextId = 0;
+  let toggling = false; // guard against double-click during animation
+
+  const moods = [
+    { min: 0,  max: 20,  face: 0, msg: "Capy is waiting for you to start... 😑" },
+    { min: 20, max: 40,  face: 1, msg: "Capy is a little nervous 👀" },
+    { min: 40, max: 60,  face: 2, msg: "Capy is getting excited! 😮" },
+    { min: 60, max: 80,  face: 3, msg: "Capy is so happy right now! 😁" },
+    { min: 80, max: 101, face: 4, msg: "Capy is on top of the world! ✌️🌿" },
+  ];
+
+  function calcHappiness() {
+    if (tasks.length === 0) return 0;
+    const done = tasks.filter(t => t.done).length;
+    return Math.round((done / tasks.length) * 100);
+  }
+
+  function updateCapy(animate) {
+    const pct = calcHappiness();
+    document.getElementById('pctLabel').textContent = pct + '%';
+    document.getElementById('barFill').style.width = Math.max(5, pct) + '%';
+
+    const mood = moods.find(m => pct >= m.min && pct < m.max) || moods[moods.length - 1];
+    document.getElementById('moodMsg').textContent = mood.msg;
+
+    document.querySelectorAll('.capy-svg').forEach((el, i) => {
+      el.classList.toggle('visible', i === mood.face);
+      el.classList.toggle('hidden', i !== mood.face);
+    });
+
+    if (animate) {
+      const face = document.getElementById('capyFace');
+      face.classList.remove('bounce');
+      void face.offsetWidth;
+      face.classList.add('bounce');
+      setTimeout(() => face.classList.remove('bounce'), 600);
+    }
+  }
+
+  function spawnSparkles(el) {
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const emojis = ['⭐','✨','🌿','💛','🍀','🌟'];
+    for (let i = 0; i < 6; i++) {
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      s.textContent = emojis[i % emojis.length];
+      const angle = (i / 6) * Math.PI * 2;
+      const dist = 55 + Math.random() * 30;
+      s.style.left = cx + 'px';
+      s.style.top = cy + 'px';
+      s.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+      s.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+      s.style.animationDelay = (i * 0.05) + 's';
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 1000);
+    }
+  }
+
+  function spawnConfetti() {
+    const colors = ['#7A9E5F','#F5E6A3','#E8D06A','#A8C68A','#C8924F','#D4E8C2'];
+    for (let i = 0; i < 30; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti-piece';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.top = '-20px';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+      c.style.animationDelay = (Math.random() * 0.5) + 's';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 3500);
+    }
+  }
+
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(str));
+    return d.innerHTML;
+  }
+
+  function renderTasks() {
+    const list = document.getElementById('taskList');
+    list.innerHTML = '';
+
+    if (tasks.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.textContent = 'No tasks yet! Add one above 🌿';
+      list.appendChild(empty);
+      return;
+    }
+
+    // Incomplete tasks first, completed at bottom
+    const sorted = [
+      ...tasks.filter(t => !t.done),
+      ...tasks.filter(t => t.done)
+    ];
+
+    sorted.forEach(task => {
+      const item = document.createElement('div');
+      item.className = 'task-item' + (task.done ? ' completed' : '');
+
+      const check = document.createElement('div');
+      check.className = 'check-btn';
+      check.innerHTML = task.done ? '&#10003;' : '';
+
+      const label = document.createElement('span');
+      label.className = 'task-text';
+      label.textContent = task.text;
+
+      const del = document.createElement('button');
+      del.className = 'delete-btn';
+      del.textContent = '✕';
+
+      item.appendChild(check);
+      item.appendChild(label);
+      item.appendChild(del);
+      list.appendChild(item);
+
+      // Toggle handler — captures live item element
+      function handleToggle(e) {
+        e.stopPropagation();
+        if (toggling) return;
+        const t = tasks.find(x => x.id === task.id);
+        if (!t) return;
+
+        if (!t.done) {
+          // Mark done: animate then re-render
+          toggling = true;
+          t.done = true;
+          // Show tick immediately on THIS element
+          check.innerHTML = '&#10003;';
+          item.classList.add('completed', 'completing');
+          spawnSparkles(item);
+          updateCapy(true);
+          setTimeout(() => {
+            toggling = false;
+            renderTasks();
+            if (tasks.length > 0 && tasks.every(x => x.done)) {
+              setTimeout(spawnConfetti, 200);
+            }
+          }, 400);
+        } else {
+          // Unmark done: instant
+          t.done = false;
+          renderTasks();
+          updateCapy(false);
+        }
+      }
+
+      check.addEventListener('click', handleToggle);
+      item.addEventListener('click', handleToggle);
+
+      del.addEventListener('click', e => {
+        e.stopPropagation();
+        const idx = tasks.findIndex(x => x.id === task.id);
+        if (idx >= 0) tasks.splice(idx, 1);
+        renderTasks();
+        updateCapy(false);
+      });
+    });
+  }
+
+  function addTask() {
+    const input = document.getElementById('taskInput');
+    const text = input.value.trim();
+    if (!text) return;
+    tasks.push({ id: nextId++, text, done: false });
+    input.value = '';
+    renderTasks();
+    updateCapy(false);
+    input.focus();
+  }
+
+  document.getElementById('addBtn').addEventListener('click', addTask);
+  document.getElementById('taskInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addTask();
+  });
+
+  renderTasks();
+  updateCapy(false);
+</script>
+</body>
+</html>
